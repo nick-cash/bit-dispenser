@@ -11,5 +11,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d9b93e2ca92c4a08bd0e35cb4f716af, type: 3}
   m_Name: ConstantlySendBitsPacketSize
   m_EditorClassIdentifier: 
-  value: 32
-  startingValue: 64
+  value: 64
+  startingValue: 32

@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d9b93e2ca92c4a08bd0e35cb4f716af, type: 3}
-  m_Name: ConstantBitsPerSecond
+  m_Name: BitsPerSecond
   m_EditorClassIdentifier: 
-  value: 32
-  startingValue: 1
+  value: 4
+  startingValue: 4
