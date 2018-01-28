@@ -18,7 +18,9 @@ public class SendPacketButton : MonoBehaviour
 
     private float time;
     private float totalTime;
+    private float fractionalBits;
     private bool transmitting;
+    private long totalBitsToSend;
 
     public long PacketSize
     {
@@ -32,17 +34,17 @@ public class SendPacketButton : MonoBehaviour
     {
         if (!transmitting)
         {
-            var packetSize = PacketSize;
-            bitsStored.Value -= packetSize;
+            totalBitsToSend = PacketSize;
+            bitsStored.Value -= totalBitsToSend;
 
             if (animator != null)
             {
-                StartCoroutine(TransmitWithAnimation(packetSize));
+                StartCoroutine(TransmitWithAnimation());
             }
             else
             {
                 totalTime = transmissionSpeed.Value;
-                StartCoroutine(TransmitOverTime(packetSize));
+                StartCoroutine(TransmitOverTime());
             }
         }
     }
@@ -64,14 +66,13 @@ public class SendPacketButton : MonoBehaviour
         }
         else
         {
-            buttonText.text = string.Format("{0} ({1}%)", PacketSize.ToString(), (int)(time / totalTime * 100));
+            buttonText.text = string.Format("{0} ({1}%)", totalBitsToSend, (int)(time / totalTime * 100));
         }
-
 
         onUpdate.Invoke();
     }
 
-    private IEnumerator TransmitWithAnimation(long totalBitsToSend)
+    private IEnumerator TransmitWithAnimation()
     {
         transmitting = true;
 
@@ -81,29 +82,43 @@ public class SendPacketButton : MonoBehaviour
         }
 
         totalTime = animator.GetCurrentAnimatorStateInfo(0).length;
-        StartCoroutine(TransmitOverTime(totalBitsToSend));
+        StartCoroutine(TransmitOverTime());
     }
 
-    private IEnumerator TransmitOverTime(long totalBitsToSend)
+    private IEnumerator TransmitOverTime()
     {
         transmitting = true;
 
         time = 0.0f;
+        fractionalBits = 0.0f;
+
         var remainingBitsToSend = totalBitsToSend;
 
         while (time < totalTime)
         {
             time += Time.deltaTime;
 
-            if (remainingBitsToSend > 0)
+            fractionalBits += ((Time.deltaTime / totalTime) * totalBitsToSend);
+
+            if (fractionalBits > 1.0f)
             {
-                var amountToSend = (long)((Time.deltaTime / totalTime) * totalBitsToSend);
-                amountToSend = Math.Min(remainingBitsToSend, Math.Max(amountToSend, 1));
+                var newBits = (long)fractionalBits;
 
-                bitsSent.Value += amountToSend;
+                fractionalBits -= newBits;
+                remainingBitsToSend -= newBits;
 
-                remainingBitsToSend = Math.Max(0, remainingBitsToSend - amountToSend);
+                bitsSent.Value += newBits;
             }
+
+            // if (remainingBitsToSend > 0)
+            // {
+            //     var amountToSend = (long)((Time.deltaTime / totalTime) * totalBitsToSend);
+            //     amountToSend = Math.Min(remainingBitsToSend, Math.Max(amountToSend, 1));
+
+            //     bitsSent.Value += amountToSend;
+
+            //     remainingBitsToSend = Math.Max(0, remainingBitsToSend - amountToSend);
+            // }
 
             yield return null;
         }

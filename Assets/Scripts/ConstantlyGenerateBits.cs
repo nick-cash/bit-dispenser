@@ -20,8 +20,7 @@ public class ConstantlyGenerateBits : MonoBehaviour
 
     private void Update()
     {
-        var bitsPerSecond = (long)Math.Round((bitsGenerated / Math.Max(time, 1)));
-        label.text = string.Format("{0} bits / second", bitsPerSecond);
+        label.text = string.Format("{0} bits / second", bitsPerSecond.Value);
     }
 
     private IEnumerator Generate()
