@@ -8,8 +8,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85583110a384c48b89a6af768fb14cf4, type: 3}
-  m_Name: TransmissionSpeed
+  m_Script: {fileID: 11500000, guid: 4d9b93e2ca92c4a08bd0e35cb4f716af, type: 3}
+  m_Name: ConstantlySendBitsPacketSize
   m_EditorClassIdentifier: 
-  value: 0.4
-  startingValue: 0.4
+  value: 0
+  startingValue: 128

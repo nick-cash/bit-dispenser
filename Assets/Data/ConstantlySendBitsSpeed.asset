@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 85583110a384c48b89a6af768fb14cf4, type: 3}
-  m_Name: TransmissionSpeed
+  m_Name: ConstantlySendBitsSpeed
   m_EditorClassIdentifier: 
-  value: 0.4
-  startingValue: 0.4
+  value: 5
+  startingValue: 10

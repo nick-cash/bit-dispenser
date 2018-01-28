@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.Events;
 
 public class SendPacketButton : MonoBehaviour
 {
@@ -13,60 +14,105 @@ public class SendPacketButton : MonoBehaviour
     public Animator animator;
     public FloatValue transmissionSpeed;
 
+    public UnityEvent onUpdate;
+
+    private float time;
+    private float totalTime;
+    private bool transmitting;
+
     public long PacketSize
     {
         get
         {
-            return Math.Min(maxPacketSize.value, bitsStored.value);
+            return Math.Min(maxPacketSize.Value, bitsStored.Value);
         }
     }
 
     public void Send()
     {
-        var packetSize = PacketSize;
-        bitsStored.value -= packetSize;
-        animator.speed = transmissionSpeed.value;
-        StartCoroutine(TransmitOverTime(packetSize));
+        if (!transmitting)
+        {
+            var packetSize = PacketSize;
+            bitsStored.Value -= packetSize;
+
+            if (animator != null)
+            {
+                StartCoroutine(TransmitWithAnimation(packetSize));
+            }
+            else
+            {
+                totalTime = transmissionSpeed.Value;
+                StartCoroutine(TransmitOverTime(packetSize));
+            }
+        }
     }
 
     public void PlayTransmitAnimation()
     {
-        animator.speed = transmissionSpeed.value;
-        animator.SetTrigger("Transmit");
+        if (animator)
+        {
+            animator.speed = transmissionSpeed.Value;
+            animator.SetTrigger("Transmit");
+        }
     }
 
-    private void Update()
+    protected void Update()
     {
-        buttonText.text = PacketSize.ToString();
+        if (animator)
+        {
+            buttonText.text = PacketSize.ToString();
+        }
+        else
+        {
+            buttonText.text = string.Format("{0} ({1}%)", PacketSize.ToString(), (int)(time / totalTime * 100));
+        }
+
+
+        onUpdate.Invoke();
     }
 
-    private IEnumerator TransmitOverTime(long totalBitsToSend)
+    private IEnumerator TransmitWithAnimation(long totalBitsToSend)
     {
+        transmitting = true;
+
         while (!animator.GetCurrentAnimatorStateInfo(0).IsName("Transmitting"))
         {
             yield return null;
         }
 
-        var time = 0.0f;
-        var totalTime = animator.GetCurrentAnimatorStateInfo(0).length;
+        totalTime = animator.GetCurrentAnimatorStateInfo(0).length;
+        StartCoroutine(TransmitOverTime(totalBitsToSend));
+    }
+
+    private IEnumerator TransmitOverTime(long totalBitsToSend)
+    {
+        transmitting = true;
+
+        time = 0.0f;
         var remainingBitsToSend = totalBitsToSend;
 
-        while ((time < totalTime) && (remainingBitsToSend > 0))
+        while (time < totalTime)
         {
             time += Time.deltaTime;
 
-            var amountToSend = (long)((Time.deltaTime / totalTime) * totalBitsToSend);
-            amountToSend = Math.Min(remainingBitsToSend, Math.Max(amountToSend, 1));
+            if (remainingBitsToSend > 0)
+            {
+                var amountToSend = (long)((Time.deltaTime / totalTime) * totalBitsToSend);
+                amountToSend = Math.Min(remainingBitsToSend, Math.Max(amountToSend, 1));
 
-            bitsSent.value += amountToSend;
-            remainingBitsToSend = Math.Max(0, remainingBitsToSend - amountToSend);
+                bitsSent.Value += amountToSend;
+
+                remainingBitsToSend = Math.Max(0, remainingBitsToSend - amountToSend);
+            }
 
             yield return null;
         }
 
         if (remainingBitsToSend > 0)
         {
-            bitsSent.value += remainingBitsToSend;
+            bitsSent.Value += remainingBitsToSend;
         }
+
+        transmitting = false;
     }
 }

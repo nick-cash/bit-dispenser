@@ -10,6 +10,6 @@ public class LongValueTextUpdater : MonoBehaviour
 
     private void Update()
     {
-        text.text = Convert.ToString(longValue.value, numericBase);
+        text.text = Convert.ToString(longValue.Value, numericBase);
     }
 }
